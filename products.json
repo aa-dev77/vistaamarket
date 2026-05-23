@@ -1,0 +1,10 @@
+[
+    {"id":"1","name":"Chanel No. 5","description":"Legendary ayollar parfyumeriyasi. 100ml","price":1500000,"old_price":1800000,"image":"https://images.unsplash.com/photo-1541643600914-78b084683601?w=400","category":"parfum","in_stock":15,"discount":17,"sold_this_week":45},
+    {"id":"2","name":"Dior Sauvage","description":"Erkaklar uchun klassik atir. 60ml","price":1200000,"old_price":1400000,"image":"https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=400","category":"parfum","in_stock":20,"discount":14,"sold_this_week":32},
+    {"id":"3","name":"Versace Crystal","description":"Ayollar uchun yangi atir. 90ml","price":980000,"old_price":1100000,"image":"https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=400","category":"parfum","in_stock":10,"discount":11,"sold_this_week":28},
+    {"id":"4","name":"Calvin Klein One","description":"Uniseks atir. 200ml","price":850000,"old_price":950000,"image":"https://images.unsplash.com/photo-1594035910387-fba47791b1cd?w=400","category":"parfum","in_stock":25,"discount":10,"sold_this_week":50},
+    {"id":"5","name":"Idish To'plami","description":"12 dona keramik idish","price":650000,"old_price":800000,"image":"https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400","category":"dishes","in_stock":30,"discount":19,"sold_this_week":15},
+    {"id":"6","name":"Ariel 5kg","description":"Kir yuvish kukuni","price":85000,"old_price":100000,"image":"https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400","category":"powders","in_stock":100,"discount":15,"sold_this_week":200},
+    {"id":"7","name":"Erkaklar Ko'ylagi","description":"Premium sifatli ko'ylak","price":350000,"old_price":450000,"image":"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400","category":"clothes","in_stock":40,"discount":22,"sold_this_week":18},
+    {"id":"8","name":"Tiffany Rose Gold","description":"Hashamatli atir","price":2200000,"old_price":2600000,"image":"https://images.unsplash.com/photo-1595425964058-1b30d2d112ed?w=400","category":"parfum","in_stock":5,"discount":15,"sold_this_week":12}
+]

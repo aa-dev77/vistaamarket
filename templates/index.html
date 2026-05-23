@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Vista Market | Har bir uy uchun</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <!-- HEADER -->
+      <header class="header" id="header">
+        <div class="header-row">
+          <div class="logo">
+            <i class="fa-solid fa-store"></i>
+            <div>
+              <h1>Vista Market</h1>
+              <span>Har bir uy uchun</span>
+            </div>
+          </div>
+          <div class="header-actions">
+            <button class="icon-btn" onclick="showView('favorites')">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+            <button class="icon-btn" onclick="showView('profile')">
+              <i class="fa-solid fa-user"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- BANNER -->
+        <div class="banner-section" id="bannerSection" style="display: none">
+          <div class="banner-container">
+            <div class="banner-slider" id="bannerSlider">
+              <div class="banner-track" id="bannerTrack"></div>
+              <div class="banner-dots" id="bannerDots"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KATEGORIYALAR -->
+        <div class="cats" id="categoriesList"></div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-content">
+        <!-- Products -->
+        <div class="view-page active" id="page-products">
+          <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Detail -->
+        <div class="view-page" id="page-detail">
+          <button class="back" onclick="goBack()">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="detail-img">
+            <img id="dImg" src="" />
+            <span class="badge" id="dDisc"></span>
+          </div>
+          <div class="detail-body">
+            <h2 id="dName"></h2>
+            <p id="dDesc"></p>
+            <div class="d-price">
+              <span class="price" id="dPrice"></span>
+              <span class="old" id="dOld"></span>
+            </div>
+            <div class="d-stats">
+              <span
+                ><i class="fa-solid fa-box"></i> Qoldiq: <b id="dStock"></b
+              ></span>
+            </div>
+            <div class="qty-row">
+              <button onclick="dQty(-1)">-</button>
+              <span id="dQty">1</span>
+              <button onclick="dQty(1)">+</button>
+            </div>
+            <button class="add-btn" onclick="addFromDetail()">
+              <i class="fa-solid fa-cart-shopping"></i> Savatga -
+              <span id="dTotal"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cart -->
+        <div class="view-page" id="page-cart">
+          <div class="v-header">
+            <button class="back" onclick="goBack()">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h2><i class="fa-solid fa-bag-shopping"></i> Savat</h2>
+            <button class="clear" onclick="clearCart()">
+              <i class="fa-solid fa-trash-alt"></i>
+            </button>
+          </div>
+          <div class="cart-list" id="cartList"></div>
+          <div class="empty-cart" id="emptyCart">
+            <i class="fa-solid fa-basket-shopping"></i>
+            <h3>Savat bo'sh</h3>
+            <button onclick="showView('products')">Xarid qilish</button>
+          </div>
+          <div class="cart-bottom" id="cartBottom" style="display: none">
+            <div class="total-row">
+              <span>Jami:</span>
+              <strong id="cartTotal"></strong>
+            </div>
+            <button class="order-btn" onclick="openCheckout()">
+              Buyurtma berish
+            </button>
+          </div>
+        </div>
+
+        <!-- Checkout -->
+        <div class="view-page" id="page-checkout">
+          <div class="v-header">
+            <button class="back" onclick="goBack()">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h2><i class="fa-solid fa-file-invoice"></i> Buyurtma</h2>
+          </div>
+          <form class="checkout-form" onsubmit="submitOrder(event)">
+            <div class="field">
+              <label><i class="fa-solid fa-user"></i> Ismingiz</label>
+              <input type="text" id="cName" placeholder="Ismingiz" required />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-phone"></i> Telefon</label>
+              <input
+                type="tel"
+                id="cPhone"
+                placeholder="+998 __ ___ __ __"
+                required
+              />
+            </div>
+            <div class="field">
+              <label><i class="fa-solid fa-location-dot"></i> Manzil</label>
+              <div class="addr-field" onclick="openAddressModal()">
+                <span id="cAddr">Manzilni tanlang</span>
+                <i class="fa-solid fa-chevron-right"></i>
+              </div>
+            </div>
+            <div class="summary">
+              <h4><i class="fa-solid fa-receipt"></i> Buyurtma tarkibi</h4>
+              <div id="checkoutItems"></div>
+              <div class="total-line">
+                <span>Jami to'lov:</span>
+                <strong id="checkoutTotal"></strong>
+              </div>
+            </div>
+            <button type="submit" class="submit-btn">
+              <i class="fa-solid fa-check-circle"></i> Tasdiqlash
+            </button>
+          </form>
+        </div>
+
+        <!-- Favorites -->
+        <div class="view-page" id="page-favorites">
+          <div class="v-header">
+            <button class="back" onclick="goBack()">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h2><i class="fa-solid fa-heart"></i> Sevimlilar</h2>
+          </div>
+          <div class="products-grid" id="favGrid"></div>
+          <div class="empty-cart" id="emptyFav">
+            <i class="fa-solid fa-heart-broken"></i>
+            <h3>Sevimlilar bo'sh</h3>
+            <button onclick="showView('products')">Mahsulotlar</button>
+          </div>
+        </div>
+
+        <!-- Profile -->
+        <div class="view-page" id="page-profile">
+          <div class="v-header">
+            <button class="back" onclick="goBack()">
+              <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <h2><i class="fa-solid fa-user-circle"></i> Mening profilim</h2>
+          </div>
+
+          <div class="profile-card">
+            <div class="avatar">
+              <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+            <h3 id="profileName">Foydalanuvchi</h3>
+            <p id="profilePhone">
+              <i class="fa-solid fa-phone"></i> Telefon qo'shilmagan
+            </p>
+            <button class="edit-btn" onclick="openEditProfileModal()">
+              <i class="fa-solid fa-pen"></i> Tahrirlash
+            </button>
+          </div>
+
+          <div class="profile-section">
+            <h3>
+              <i class="fa-solid fa-clock-rotate-left"></i> Mening buyurtmalarim
+            </h3>
+            <div id="profileOrders">
+              <div style="text-align: center; padding: 30px; color: #94a3b8">
+                <i class="fa-solid fa-spinner fa-pulse"></i> Yuklanmoqda...
+              </div>
+            </div>
+          </div>
+
+          <div class="profile-section" id="adminSection" style="display: none">
+            <a href="/admin" class="admin-link">
+              <i class="fa-solid fa-crown"></i>
+              <div>
+                <strong>Admin Panel</strong>
+                <small>Boshqaruv</small>
+              </div>
+              <i class="fa-solid fa-chevron-right"></i>
+            </a>
+          </div>
+
+          <div class="profile-section">
+            <button class="logout-btn" onclick="logout()">
+              <i class="fa-solid fa-right-from-bracket"></i> Chiqish
+            </button>
+          </div>
+        </div>
+      </main>
+
+      <!-- BOTTOM NAV -->
+      <nav class="bottom-nav">
+        <button
+          class="nav-btn active"
+          onclick="showView('products')"
+          data-nav="products"
+        >
+          <i class="fa-solid fa-house"></i>
+          <span>Bosh sahifa</span>
+        </button>
+        <button class="nav-btn" onclick="showView('cart')" data-nav="cart">
+          <i class="fa-solid fa-bag-shopping"></i>
+          <span>Savat</span>
+          <span class="badge" id="cartBadge">0</span>
+        </button>
+        <button
+          class="nav-btn"
+          onclick="showView('favorites')"
+          data-nav="favorites"
+        >
+          <i class="fa-solid fa-heart"></i>
+          <span>Sevimlilar</span>
+        </button>
+        <button
+          class="nav-btn"
+          onclick="showView('profile')"
+          data-nav="profile"
+        >
+          <i class="fa-solid fa-user"></i>
+          <span>Mening</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Address Modal -->
+    <div class="modal-overlay" id="addressModal">
+      <div class="modal-box">
+        <h3><i class="fa-solid fa-location-dot"></i> Manzil</h3>
+        <input type="text" id="addressInput" placeholder="Manzilni kiriting" />
+        <div class="modal-btns">
+          <button onclick="getGPS()" class="btn-outline">
+            <i class="fa-solid fa-location-crosshairs"></i> GPS
+          </button>
+          <button onclick="saveAddress()" class="btn-primary">Saqlash</button>
+        </div>
+        <button onclick="closeModal('addressModal')" class="modal-x">
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal-overlay" id="editProfileModal">
+      <div class="modal-box">
+        <h3><i class="fa-solid fa-user-pen"></i> Profilni tahrirlash</h3>
+        <input type="text" id="editName" placeholder="Ismingiz" />
+        <input type="tel" id="editPhone" placeholder="Telefon raqam" />
+        <div class="modal-btns">
+          <button onclick="closeModal('editProfileModal')" class="btn-outline">
+            Bekor qilish
+          </button>
+          <button onclick="saveProfile()" class="btn-primary">Saqlash</button>
+        </div>
+        <button onclick="closeModal('editProfileModal')" class="modal-x">
+          &times;
+        </button>
+      </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+  </body>
+</html>

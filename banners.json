@@ -1,0 +1,31 @@
+{
+  "banners": [
+    {
+      "id": "1",
+      "image": "https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?w=800",
+      "title": "🔥 Super Chegirma!",
+      "subtitle": "Barcha mahsulotlarga 20% gacha",
+      "link": "/",
+      "active": true,
+      "order": 1
+    },
+    {
+      "id": "2",
+      "image": "https://images.pexels.com/photos/2927008/pexels-photo-2927008.jpeg?w=800",
+      "title": "✨ Yangi Mahsulotlar",
+      "subtitle": "Eng sifatli tovarlar",
+      "link": "/",
+      "active": true,
+      "order": 2
+    },
+    {
+      "id": "3",
+      "image": "https://images.pexels.com/photos/4483610/pexels-photo-4483610.jpeg?w=800",
+      "title": "🚚 Bepul Yetkazib Berish",
+      "subtitle": "500 000 so'mdan yuqori",
+      "link": "/",
+      "active": true,
+      "order": 3
+    }
+  ]
+}
