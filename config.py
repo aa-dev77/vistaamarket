@@ -2,18 +2,18 @@ import os
 
 class Config:
     # Flask
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'zenilpro_super_secret_2024_key')
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'VistaMarket_super_secret_2024_key')
     
     # Admin settings
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'zen123')
     ADMIN_IDS = [6769229781]  # O'z Telegram IDlaringizni kiriting
     
     # Bot
-    BOT_TOKEN = os.environ.get('BOT_TOKEN', '8716353787:AAGAddW33W3jbOa0CVZVxez1MqqHL-bvCf0')
-    BOT_USERNAME = os.environ.get('BOT_USERNAME', 'ZenilProBot')
+    BOT_TOKEN = os.environ.get('BOT_TOKEN', '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U')
+    BOT_USERNAME = os.environ.get('BOT_USERNAME', 'VistaMarket')
     
     # Shop
-    SHOP_NAME = 'ZenilPro'
+    SHOP_NAME = 'VistaMarket'
     SHOP_DESCRIPTION = 'Premium Parfyumeriya Do\'koni'
     CURRENCY = 'UZS'
     CURRENCY_SYMBOL = 'so\'m'
@@ -41,8 +41,8 @@ class Config:
     ]
     
     # Delivery
-    DELIVERY_FREE_FROM = 500000
-    DELIVERY_COST = 30000
+    DELIVERY_FREE_FROM = 0
+    DELIVERY_COST = 0
     
     @classmethod
     def is_admin(cls, telegram_id):
