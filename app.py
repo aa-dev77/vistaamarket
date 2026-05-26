@@ -7,11 +7,11 @@ from datetime import datetime
 class Config:
     SECRET_KEY = 'vista_market_2024'
     ADMIN_PASSWORD = 'vista2026'
-    ADMIN_IDS = [6141183218]  # O'z Telegram IDingiz
+    ADMIN_IDS = [6141183218]
     
-    # ========== BOT TOKEN ==========
     BOT_TOKEN = '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U'
     
+    # JSON fayllar
     PRODUCTS_FILE = 'products.json'
     ORDERS_FILE = 'orders.json'
     BANNERS_FILE = 'banners.json'
@@ -69,28 +69,12 @@ def webhook():
             first_name = user.get('first_name', 'Foydalanuvchi')
             user_id = user.get('id')
             
-            # Foydalanuvchini saqlash
-            users = load_json(Config.USERS_FILE, {})
-            users[str(user_id)] = {
-                'user_id': user_id,
-                'first_name': user.get('first_name', ''),
-                'username': user.get('username', ''),
-                'last_seen': datetime.now().isoformat()
-            }
-            save_json(Config.USERS_FILE, users)
-            
             if text == '/start':
                 webapp_url = request.host_url.rstrip('/')
                 
                 welcome = f"""👋 <b>Assalomu alaykum, {first_name}!</b>
 
 🏪 <b>Vista Market</b> - Har bir uy uchun kerakli hamma narsa!
-
-✅ <b>Bizning do'konda:</b>
-• 🔥 Yuqori sifatli mahsulotlar
-• 💰 Arzon narxlar
-• 🚚 Tez yetkazib berish
-• 💳 Click, Payme, Naqd to'lov
 
 👇 <b>Do'konga kirish uchun tugmani bosing:</b>"""
 
@@ -109,23 +93,6 @@ def webhook():
                     send_telegram(chat_id, f"🔐 <b>Admin Panel</b>\n\n🔗 {webapp_url}/admin\n🔑 Parol: {Config.ADMIN_PASSWORD}")
                 else:
                     send_telegram(chat_id, "❌ Siz admin emassiz!")
-            
-            elif text == '/help':
-                help_text = f"""📚 <b>Yordam</b>
-
-🛍 <b>Do'konga kirish:</b> /start tugmasini bosing
-📦 <b>Buyurtma holati:</b> Profil -> Buyurtmalarim
-👤 <b>Profil:</b> Do'kon ichida "Mening" bo'limi"""
-                send_telegram(chat_id, help_text)
-            
-            else:
-                webapp_url = request.host_url.rstrip('/')
-                reply_markup = {
-                    'inline_keyboard': [
-                        [{'text': '🛍 Do\'konga kirish', 'web_app': {'url': webapp_url}}]
-                    ]
-                }
-                send_telegram(chat_id, f"👋 {first_name}, do'konimizga xush kelibsiz!\n\n👇 Tugmani bosing:", reply_markup)
         
         elif 'callback_query' in data:
             callback = data['callback_query']
@@ -137,16 +104,10 @@ def webhook():
             requests.post(url, json={'callback_query_id': callback_id})
             
             if data_cb == 'help':
-                help_text = """📚 <b>Yordam bo'limi</b>
+                help_text = """📚 <b>Yordam</b>
 
-🛍 <b>Qanday xarid qilish?</b>
-1. Do'konga kiring
-2. Mahsulotni tanlang
-3. Savatga qo'shing
-4. Buyurtma bering
-
-📦 <b>Buyurtma holati</b>
-Profil -> Buyurtmalarim bo'limidan kuzatishingiz mumkin"""
+🛍 Do'konga kirish: /start
+📦 Buyurtmalar: Profil -> Buyurtmalarim"""
                 send_telegram(chat_id, help_text)
         
         return jsonify({'ok': True})
@@ -154,14 +115,14 @@ Profil -> Buyurtmalarim bo'limidan kuzatishingiz mumkin"""
         print(f"❌ Webhook xatolik: {e}")
         return jsonify({'ok': False})
 
-# ==================== MAHSULOTLAR ====================
+# ==================== MAHSULOTLAR (JSON) ====================
 DEFAULT_PRODUCTS = [
-    {"id":"1","name":"Chanel No. 5","description":"Legendary ayollar parfyumeriyasi","price":1500000,"old_price":1800000,"image":"https://images.unsplash.com/photo-1541643600914-78b084683601?w=400","category":"parfum","in_stock":15,"discount":17},
-    {"id":"2","name":"Dior Sauvage","description":"Erkaklar uchun klassik atir","price":1200000,"old_price":1400000,"image":"https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=400","category":"parfum","in_stock":20,"discount":14},
-    {"id":"3","name":"Idish To'plami","description":"12 dona keramik idish","price":650000,"old_price":800000,"image":"https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400","category":"dishes","in_stock":30,"discount":19},
-    {"id":"4","name":"Ariel 5kg","description":"Kir yuvish kukuni","price":85000,"old_price":100000,"image":"https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400","category":"powders","in_stock":100,"discount":15},
-    {"id":"5","name":"Erkaklar Ko'ylagi","description":"Premium sifatli ko'ylak","price":350000,"old_price":450000,"image":"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400","category":"clothes","in_stock":40,"discount":22},
-    {"id":"6","name":"Tiffany Rose Gold","description":"Hashamatli atir","price":2200000,"old_price":2600000,"image":"https://images.unsplash.com/photo-1595425964058-1b30d2d112ed?w=400","category":"parfum","in_stock":5,"discount":15}
+    {"id":"1","name":"Chanel No. 5","description":"Legendary ayollar parfyumeriyasi","price":1500000,"old_price":1800000,"image":"https://images.unsplash.com/photo-1541643600914-78b084683601?w=400","category":"parfum","in_stock":15,"discount":17,"sold_this_week":45},
+    {"id":"2","name":"Dior Sauvage","description":"Erkaklar uchun klassik atir","price":1200000,"old_price":1400000,"image":"https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=400","category":"parfum","in_stock":20,"discount":14,"sold_this_week":32},
+    {"id":"3","name":"Idish To'plami","description":"12 dona keramik idish","price":650000,"old_price":800000,"image":"https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400","category":"dishes","in_stock":30,"discount":19,"sold_this_week":15},
+    {"id":"4","name":"Ariel 5kg","description":"Kir yuvish kukuni","price":85000,"old_price":100000,"image":"https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=400","category":"powders","in_stock":100,"discount":15,"sold_this_week":200},
+    {"id":"5","name":"Erkaklar Ko'ylagi","description":"Premium sifatli ko'ylak","price":350000,"old_price":450000,"image":"https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400","category":"clothes","in_stock":40,"discount":22,"sold_this_week":18},
+    {"id":"6","name":"Tiffany Rose Gold","description":"Hashamatli atir","price":2200000,"old_price":2600000,"image":"https://images.unsplash.com/photo-1595425964058-1b30d2d112ed?w=400","category":"parfum","in_stock":5,"discount":15,"sold_this_week":12}
 ]
 
 def load_products():
@@ -183,12 +144,9 @@ def save_orders(o):
 def load_banners():
     data = load_json(Config.BANNERS_FILE)
     if not data or 'banners' not in data:
-        default = {
-            "banners": [
-                {"id": "1", "image": "https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?w=800", "title": "🔥 Super Chegirma!", "subtitle": "Barcha mahsulotlarga 20% gacha", "link": "/", "active": True, "order": 1},
-                {"id": "2", "image": "https://images.pexels.com/photos/2927008/pexels-photo-2927008.jpeg?w=800", "title": "✨ Yangi Mahsulotlar", "subtitle": "Eng sifatli tovarlar", "link": "/", "active": True, "order": 2}
-            ]
-        }
+        default = {"banners": [
+            {"id": "1", "image": "https://images.pexels.com/photos/5632402/pexels-photo-5632402.jpeg?w=800", "title": "🔥 Super Chegirma!", "subtitle": "Barcha mahsulotlarga 20% gacha", "link": "/", "active": True, "order": 1}
+        ]}
         save_json(Config.BANNERS_FILE, default)
         return default
     return data
@@ -230,65 +188,42 @@ def check_admin():
     return jsonify({'is_admin': uid in Config.ADMIN_IDS})
 
 # ==================== BUYURTMALAR ====================
-@app.route('/api/orders', methods=['GET', 'POST'])
-def handle_orders():
-    if request.method == 'POST':
-        d = request.json
-        p = load_products()
-        
-        sub = sum(i.get('price', 0) * i.get('quantity', 1) for i in d.get('items', []))
-        
-        order = {
-            'order_id': str(uuid.uuid4())[:8].upper(),
-            'user_id': d.get('user_id'),
-            'customer_name': d.get('name', 'Mijoz'),
-            'phone': d.get('phone', ''),
-            'address': d.get('address', ''),
-            'items': d.get('items', []),
-            'total': sub,
-            'status': 'pending',
-            'status_text': 'Tayyorlanmoqda',
-            'created_at': datetime.now().isoformat()
-        }
-        
-        for item in order['items']:
-            prod = next((x for x in p if x['id'] == item['id']), None)
-            if prod:
-                prod['in_stock'] = max(0, prod['in_stock'] - item.get('quantity', 1))
-        
-        save_products(p)
-        orders = load_orders()
-        orders.append(order)
-        save_orders(orders)
-        
-        for admin_id in Config.ADMIN_IDS:
-            send_telegram(admin_id, f"🛍 <b>Yangi buyurtma!</b>\n\n🆔 #{order['order_id']}\n👤 {order['customer_name']}\n📱 {order['phone']}\n💰 {order['total']:,} so'm")
-        
-        if d.get('user_id'):
-            send_telegram(d['user_id'], f"✅ <b>Buyurtma qabul qilindi!</b>\n\n🆔 #{order['order_id']}\n💰 {order['total']:,} so'm\n📊 Holat: {order['status_text']}")
-        
-        return jsonify({'success': True, 'order': order})
-    else:
-        uid = request.args.get('user_id', type=int)
-        orders = load_orders()
-        if uid:
-            orders = [o for o in orders if o.get('user_id') == uid]
-        return jsonify({'success': True, 'orders': orders[::-1]})
-
-# ==================== USER ====================
-@app.route('/api/user', methods=['POST'])
-def save_user():
+@app.route('/api/orders', methods=['POST'])
+def create_order():
     d = request.json
-    users = load_json(Config.USERS_FILE, {})
-    users[str(d.get('user_id', ''))] = {
+    p = load_products()
+    
+    sub = sum(i.get('price', 0) * i.get('quantity', 1) for i in d.get('items', []))
+    
+    order = {
+        'order_id': str(uuid.uuid4())[:8].upper(),
         'user_id': d.get('user_id'),
-        'first_name': d.get('first_name', ''),
-        'username': d.get('username', ''),
+        'customer_name': d.get('name', 'Mijoz'),
         'phone': d.get('phone', ''),
-        'updated_at': datetime.now().isoformat()
+        'address': d.get('address', ''),
+        'items': d.get('items', []),
+        'total': sub,
+        'status': 'pending',
+        'status_text': 'Tayyorlanmoqda',
+        'created_at': datetime.now().isoformat()
     }
-    save_json(Config.USERS_FILE, users)
-    return jsonify({'success': True})
+    
+    # Stokdan ayirish
+    for item in order['items']:
+        prod = next((x for x in p if x['id'] == item['id']), None)
+        if prod:
+            prod['in_stock'] = max(0, prod['in_stock'] - item.get('quantity', 1))
+    
+    save_products(p)  # JSON ga saqlash
+    orders = load_orders()
+    orders.append(order)
+    save_orders(orders)
+    
+    # Adminlarga xabar
+    for admin_id in Config.ADMIN_IDS:
+        send_telegram(admin_id, f"🛍 Yangi buyurtma #{order['order_id']}\n👤 {order['customer_name']}\n💰 {order['total']:,} so'm")
+    
+    return jsonify({'success': True, 'order': order})
 
 # ==================== ADMIN ====================
 @app.route('/api/admin/login', methods=['POST'])
@@ -331,8 +266,9 @@ def admin_products():
     p = load_products()
     if request.method == 'POST':
         d = request.json
+        new_id = str(uuid.uuid4())[:8]
         new = {
-            'id': str(uuid.uuid4())[:8],
+            'id': new_id,
             'name': d.get('name', ''),
             'description': d.get('description', ''),
             'price': int(d.get('price', 0)),
@@ -340,11 +276,12 @@ def admin_products():
             'image': d.get('image', 'https://placehold.co/400'),
             'category': d.get('category', 'parfum'),
             'in_stock': int(d.get('in_stock', 10)),
-            'discount': int(d.get('discount', 0))
+            'discount': int(d.get('discount', 0)),
+            'sold_this_week': 0
         }
         p.append(new)
         save_products(p)
-        return jsonify({'success': True})
+        return jsonify({'success': True, 'product': new})
     elif request.method == 'DELETE':
         pid = request.json.get('id')
         p = [x for x in p if x['id'] != pid]
@@ -383,10 +320,6 @@ def update_order_status(order_id):
             status_map = {'pending': 'Tayyorlanmoqda', 'confirmed': 'Yo\'lda', 'delivered': 'Yetkazilgan', 'cancelled': 'Bekor qilingan'}
             o['status_text'] = status_map.get(o['status'], o['status'])
             save_orders(orders)
-            
-            if o.get('user_id'):
-                send_telegram(o['user_id'], f"📦 <b>Buyurtma statusi yangilandi!</b>\n\n🆔 #{o['order_id']}\n📊 Yangi holat: {o['status_text']}")
-            
             return jsonify({'success': True})
     return jsonify({'success': False})
 
@@ -441,10 +374,15 @@ if __name__ == '__main__':
     os.makedirs('static/js', exist_ok=True)
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
     
+    # products.json ni tekshirish
+    if not os.path.exists(Config.PRODUCTS_FILE):
+        save_json(Config.PRODUCTS_FILE, DEFAULT_PRODUCTS)
+        print("✅ products.json yaratildi")
+    
     port = int(os.environ.get('PORT', 5000))
     
     print("\n" + "="*50)
-    print("  🏪 VISTA MARKET - Telegram Bot bilan")
+    print("  🏪 VISTA MARKET")
     print("="*50)
     print(f"  🌐 Do'kon: https://vista-market.onrender.com")
     print(f"  🔐 Admin: https://vista-market.onrender.com/admin")
