@@ -5,16 +5,16 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'VistaMarket_super_secret_2024_key')
     
     # Admin settings
-    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'zen123')
-    ADMIN_IDS = [6769229781]  # O'z Telegram IDlaringizni kiriting
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'vista2024')  # <-- parolni o'zgartirdim
+    ADMIN_IDS = [6141183218]  # <-- SIZNING TELEGRAM ID INGIZ! (𝐀 user)
     
     # Bot
     BOT_TOKEN = os.environ.get('BOT_TOKEN', '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U')
-    BOT_USERNAME = os.environ.get('BOT_USERNAME', 'VistaMarket')
+    BOT_USERNAME = os.environ.get('BOT_USERNAME', 'vistauz_bot')  # <-- to'g'ri username
     
     # Shop
-    SHOP_NAME = 'VistaMarket'
-    SHOP_DESCRIPTION = 'Premium Parfyumeriya Do\'koni'
+    SHOP_NAME = 'Vista Market'
+    SHOP_DESCRIPTION = 'Har bir uy uchun'
     CURRENCY = 'UZS'
     CURRENCY_SYMBOL = 'so\'m'
     
@@ -41,8 +41,8 @@ class Config:
     ]
     
     # Delivery
-    DELIVERY_FREE_FROM = 0
-    DELIVERY_COST = 0
+    DELIVERY_FREE_FROM = 500000  # <-- 500,000 so'mdan yuqori bepul
+    DELIVERY_COST = 10000  # <-- 30,000 so'm
     
     @classmethod
     def is_admin(cls, telegram_id):
