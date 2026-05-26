@@ -7,10 +7,10 @@ from datetime import datetime
 class Config:
     SECRET_KEY = 'vista_market_2024'
     ADMIN_PASSWORD = 'vista2026'
-    ADMIN_IDS = [6141183218]  # O'z Telegram IDingizni qo'ying!
+    ADMIN_IDS = [6141183218]  # O'z Telegram IDingiz
     
     # ========== BOT TOKEN ==========
-    BOT_TOKEN = '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U'  # <<<<<<<< TOKENNI SHU YERGA QO'YING!
+    BOT_TOKEN = '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U'
     
     PRODUCTS_FILE = 'products.json'
     ORDERS_FILE = 'orders.json'
@@ -40,7 +40,7 @@ def save_json(f, data):
 
 # ==================== TELEGRAM BOT ====================
 def send_telegram(chat_id, text, reply_markup=None):
-    if not Config.BOT_TOKEN or Config.BOT_TOKEN == '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U':
+    if not Config.BOT_TOKEN:
         print("⚠️ Bot token o'rnatilmagan!")
         return None
     url = f"https://api.telegram.org/bot{Config.BOT_TOKEN}/sendMessage"
@@ -79,11 +79,9 @@ def webhook():
             }
             save_json(Config.USERS_FILE, users)
             
-            # ============ /start KODI ============
             if text == '/start':
                 webapp_url = request.host_url.rstrip('/')
                 
-                # Salom xabari
                 welcome = f"""👋 <b>Assalomu alaykum, {first_name}!</b>
 
 🏪 <b>Vista Market</b> - Har bir uy uchun kerakli hamma narsa!
@@ -96,18 +94,15 @@ def webhook():
 
 👇 <b>Do'konga kirish uchun tugmani bosing:</b>"""
 
-                # Web App tugmasi bilan inline keyboard
                 reply_markup = {
                     'inline_keyboard': [
                         [{'text': '🛍 VISTA MARKETGA KIRISH', 'web_app': {'url': webapp_url}}],
-                        [{'text': '📞 Biz bilan bog\'lanish', 'url': 'https://t.me/vista_market_support'}],
                         [{'text': 'ℹ️ Yordam', 'callback_data': 'help'}]
                     ]
                 }
                 
                 send_telegram(chat_id, welcome, reply_markup)
             
-            # ============ /admin ============
             elif text == '/admin':
                 if user_id in Config.ADMIN_IDS:
                     webapp_url = request.host_url.rstrip('/')
@@ -115,18 +110,14 @@ def webhook():
                 else:
                     send_telegram(chat_id, "❌ Siz admin emassiz!")
             
-            # ============ /help ============
             elif text == '/help':
                 help_text = f"""📚 <b>Yordam</b>
 
 🛍 <b>Do'konga kirish:</b> /start tugmasini bosing
 📦 <b>Buyurtma holati:</b> Profil -> Buyurtmalarim
-👤 <b>Profil:</b> Do'kon ichida "Mening" bo'limi
-
-<b>Savollar bo'lsa:</b> @vista_market_support"""
+👤 <b>Profil:</b> Do'kon ichida "Mening" bo'limi"""
                 send_telegram(chat_id, help_text)
             
-            # ============ Boshqa xabarlar ============
             else:
                 webapp_url = request.host_url.rstrip('/')
                 reply_markup = {
@@ -136,14 +127,12 @@ def webhook():
                 }
                 send_telegram(chat_id, f"👋 {first_name}, do'konimizga xush kelibsiz!\n\n👇 Tugmani bosing:", reply_markup)
         
-        # ============ CALLBACK QUERY ============
         elif 'callback_query' in data:
             callback = data['callback_query']
             callback_id = callback['id']
             chat_id = callback['message']['chat']['id']
             data_cb = callback.get('data', '')
             
-            # Callback ga javob
             url = f"https://api.telegram.org/bot{Config.BOT_TOKEN}/answerCallbackQuery"
             requests.post(url, json={'callback_query_id': callback_id})
             
@@ -157,9 +146,7 @@ def webhook():
 4. Buyurtma bering
 
 📦 <b>Buyurtma holati</b>
-Profil -> Buyurtmalarim bo'limidan kuzatishingiz mumkin
-
-📞 <b>Aloqa:</b> @vista_market_support"""
+Profil -> Buyurtmalarim bo'limidan kuzatishingiz mumkin"""
                 send_telegram(chat_id, help_text)
         
         return jsonify({'ok': True})
@@ -264,7 +251,6 @@ def handle_orders():
             'created_at': datetime.now().isoformat()
         }
         
-        # Stokdan ayirish
         for item in order['items']:
             prod = next((x for x in p if x['id'] == item['id']), None)
             if prod:
@@ -275,13 +261,11 @@ def handle_orders():
         orders.append(order)
         save_orders(orders)
         
-        # Adminlarga xabar yuborish
         for admin_id in Config.ADMIN_IDS:
             send_telegram(admin_id, f"🛍 <b>Yangi buyurtma!</b>\n\n🆔 #{order['order_id']}\n👤 {order['customer_name']}\n📱 {order['phone']}\n💰 {order['total']:,} so'm")
         
-        # Foydalanuvchiga xabar yuborish
         if d.get('user_id'):
-            send_telegram(d['user_id'], f"✅ <b>Buyurtma qabul qilindi!</b>\n\n🆔 #{order['order_id']}\n💰 {order['total']:,} so'm\n📊 Holat: {order['status_text']}\n\nYetkazib berish xizmati siz bilan bog'lanadi.")
+            send_telegram(d['user_id'], f"✅ <b>Buyurtma qabul qilindi!</b>\n\n🆔 #{order['order_id']}\n💰 {order['total']:,} so'm\n📊 Holat: {order['status_text']}")
         
         return jsonify({'success': True, 'order': order})
     else:
@@ -400,7 +384,6 @@ def update_order_status(order_id):
             o['status_text'] = status_map.get(o['status'], o['status'])
             save_orders(orders)
             
-            # Foydalanuvchiga status yangilanishi haqida xabar
             if o.get('user_id'):
                 send_telegram(o['user_id'], f"📦 <b>Buyurtma statusi yangilandi!</b>\n\n🆔 #{o['order_id']}\n📊 Yangi holat: {o['status_text']}")
             
@@ -458,15 +441,14 @@ if __name__ == '__main__':
     os.makedirs('static/js', exist_ok=True)
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
     
+    port = int(os.environ.get('PORT', 5000))
+    
     print("\n" + "="*50)
     print("  🏪 VISTA MARKET - Telegram Bot bilan")
     print("="*50)
-    print(f"  🌐 Do'kon: http://localhost:5000")
-    print(f"  🔐 Admin: http://localhost:5000/admin")
+    print(f"  🌐 Do'kon: https://vista-market.onrender.com")
+    print(f"  🔐 Admin: https://vista-market.onrender.com/admin")
     print(f"  🔑 Parol: {Config.ADMIN_PASSWORD}")
-    print("="*50)
-    print("\n  ⚠️ BOT TOKENNI O'RNATING!")
-    print("  app.py dagi 'YOUR_BOT_TOKEN_HERE' ni o'zgartiring")
     print("="*50 + "\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=False, host='0.0.0.0', port=port)
