@@ -1,41 +1,103 @@
 from flask import Flask, render_template, request, jsonify, session, send_from_directory
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-from models import db, Product, Order, Banner, User
-from config import Config
-import os, uuid, json, requests
 from datetime import datetime
+import json, os, uuid, requests
+
+# ==================== CONFIG ====================
+class Config:
+    SECRET_KEY = 'vista_market_2024'
+    ADMIN_PASSWORD = 'vista2026'
+    ADMIN_IDS = [6141183218]
+    BOT_TOKEN = '8830375215:AAFS10uy1cGPwqHU26J98Noo2Pv6JjKNr4U'
+    
+    # Database
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    if DATABASE_URL and 'render.com' in DATABASE_URL and 'sslmode' not in DATABASE_URL:
+        DATABASE_URL += '?sslmode=require'
+    
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL or 'sqlite:///vista_market.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    SHOP_NAME = 'Vista Market'
+    UPLOAD_FOLDER = 'static/uploads'
 
 app = Flask(__name__)
 app.config.from_object(Config)
-db.init_app(app)
 CORS(app)
+
+db = SQLAlchemy(app)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# ==================== DATABASE ====================
-def init_db():
-    with app.app_context():
-        db.create_all()
-        # Default mahsulotlar
-        if Product.query.count() == 0:
-            default_products = [
-                Product(id="1", name="Chanel No. 5", description="Legendary ayollar parfyumeriyasi", price=1500000, old_price=1800000, category="parfum", in_stock=15, discount=17, sold_this_week=45),
-                Product(id="2", name="Dior Sauvage", description="Erkaklar uchun klassik atir", price=1200000, old_price=1400000, category="parfum", in_stock=20, discount=14, sold_this_week=32),
-                Product(id="3", name="Idish To'plami", description="12 dona keramik idish", price=650000, old_price=800000, category="dishes", in_stock=30, discount=19, sold_this_week=15),
-                Product(id="4", name="Ariel 5kg", description="Kir yuvish kukuni", price=85000, old_price=100000, category="powders", in_stock=100, discount=15, sold_this_week=200),
-                Product(id="5", name="Erkaklar Ko'ylagi", description="Premium sifatli ko'ylak", price=350000, old_price=450000, category="clothes", in_stock=40, discount=22, sold_this_week=18),
-                Product(id="6", name="Tiffany Rose Gold", description="Hashamatli atir", price=2200000, old_price=2600000, category="parfum", in_stock=5, discount=15, sold_this_week=12)
-            ]
-            for p in default_products:
-                db.session.add(p)
-            db.session.commit()
-            print("✅ Default mahsulotlar qo'shildi")
+# ==================== MODELS ====================
+class Product(db.Model):
+    __tablename__ = 'products'
+    id = db.Column(db.String(20), primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, default='')
+    price = db.Column(db.Integer, nullable=False)
+    old_price = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(500), default='https://placehold.co/400')
+    category = db.Column(db.String(50), default='parfum')
+    in_stock = db.Column(db.Integer, default=10)
+    discount = db.Column(db.Integer, default=0)
+    sold_this_week = db.Column(db.Integer, default=0)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'price': self.price,
+            'old_price': self.old_price,
+            'image': self.image,
+            'category': self.category,
+            'in_stock': self.in_stock,
+            'discount': self.discount,
+            'sold_this_week': self.sold_this_week
+        }
 
-init_db()
+class Order(db.Model):
+    __tablename__ = 'orders'
+    order_id = db.Column(db.String(20), primary_key=True)
+    user_id = db.Column(db.String(50), nullable=True)
+    customer_name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(50), nullable=False)
+    address = db.Column(db.Text, default='')
+    items = db.Column(db.Text, default='[]')
+    total = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    status_text = db.Column(db.String(50), default='Tayyorlanmoqda')
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    def to_dict(self):
+        return {
+            'order_id': self.order_id,
+            'user_id': self.user_id,
+            'customer_name': self.customer_name,
+            'phone': self.phone,
+            'address': self.address,
+            'items': json.loads(self.items) if self.items else [],
+            'total': self.total,
+            'status': self.status,
+            'status_text': self.status_text,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class Banner(db.Model):
+    __tablename__ = 'banners'
+    id = db.Column(db.String(20), primary_key=True)
+    image = db.Column(db.String(500), nullable=False)
+    title = db.Column(db.String(200), default='')
+    subtitle = db.Column(db.String(200), default='')
+    link = db.Column(db.String(200), default='/')
+    active = db.Column(db.Boolean, default=True)
+    order = db.Column(db.Integer, default=0)
 
 # ==================== TELEGRAM BOT ====================
 def send_telegram(chat_id, text, reply_markup=None):
@@ -71,6 +133,13 @@ def webhook():
                     ]
                 }
                 send_telegram(chat_id, welcome, reply_markup)
+            
+            elif text == '/admin':
+                if user_id in Config.ADMIN_IDS:
+                    webapp_url = request.host_url.rstrip('/')
+                    send_telegram(chat_id, f"🔐 Admin Panel\n\n{webapp_url}/admin\nParol: {Config.ADMIN_PASSWORD}")
+                else:
+                    send_telegram(chat_id, "❌ Siz admin emassiz!")
         
         return jsonify({'ok': True})
     except:
@@ -84,6 +153,10 @@ def index():
 @app.route('/admin')
 def admin():
     return render_template('admin.html')
+
+@app.route('/static/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(Config.UPLOAD_FOLDER, filename)
 
 @app.route('/api/products')
 def get_products():
@@ -99,6 +172,12 @@ def get_banners():
     banners = Banner.query.filter_by(active=True).order_by(Banner.order).all()
     return jsonify({'success': True, 'banners': [{'id': b.id, 'image': b.image, 'title': b.title, 'subtitle': b.subtitle, 'link': b.link} for b in banners]})
 
+@app.route('/api/check-admin')
+def check_admin():
+    uid = request.args.get('user_id', type=int)
+    return jsonify({'is_admin': uid in Config.ADMIN_IDS})
+
+# ==================== BUYURTMALAR ====================
 @app.route('/api/orders', methods=['POST'])
 def create_order():
     data = request.json
@@ -124,7 +203,6 @@ def create_order():
     db.session.add(order)
     db.session.commit()
     
-    # Adminlarga xabar
     for admin_id in Config.ADMIN_IDS:
         send_telegram(admin_id, f"🛍 Yangi buyurtma #{order.order_id}\n👤 {order.customer_name}\n💰 {total:,} so'm")
     
@@ -146,6 +224,22 @@ def admin_check():
 def admin_logout():
     session.clear()
     return jsonify({'success': True})
+
+@app.route('/api/admin/upload', methods=['POST'])
+def admin_upload():
+    if not session.get('admin'):
+        return jsonify({'success': False}), 401
+    if 'file' not in request.files:
+        return jsonify({'success': False})
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'success': False})
+    if file and allowed_file(file.filename):
+        filename = str(uuid.uuid4())[:8] + '_' + secure_filename(file.filename)
+        os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
+        file.save(os.path.join(Config.UPLOAD_FOLDER, filename))
+        return jsonify({'success': True, 'url': f"/static/uploads/{filename}"})
+    return jsonify({'success': False})
 
 @app.route('/api/admin/products', methods=['GET', 'POST', 'DELETE'])
 def admin_products():
@@ -218,6 +312,50 @@ def update_order_status(order_id):
         return jsonify({'success': True})
     return jsonify({'success': False})
 
+@app.route('/api/admin/banners', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def admin_banners():
+    if not session.get('admin'):
+        return jsonify({'success': False}), 401
+    
+    if request.method == 'GET':
+        banners = Banner.query.order_by(Banner.order).all()
+        return jsonify({'success': True, 'banners': [{'id': b.id, 'image': b.image, 'title': b.title, 'subtitle': b.subtitle, 'link': b.link, 'active': b.active, 'order': b.order} for b in banners]})
+    
+    elif request.method == 'POST':
+        data = request.json
+        new_banner = Banner(
+            id=str(uuid.uuid4())[:8],
+            image=data['image'],
+            title=data.get('title', ''),
+            subtitle=data.get('subtitle', ''),
+            link=data.get('link', '/'),
+            active=data.get('active', True),
+            order=data.get('order', Banner.query.count() + 1)
+        )
+        db.session.add(new_banner)
+        db.session.commit()
+        return jsonify({'success': True})
+    
+    elif request.method == 'PUT':
+        data = request.json
+        banner = Banner.query.get(data['id'])
+        if banner:
+            banner.image = data.get('image', banner.image)
+            banner.title = data.get('title', banner.title)
+            banner.subtitle = data.get('subtitle', banner.subtitle)
+            banner.link = data.get('link', banner.link)
+            banner.active = data.get('active', banner.active)
+            banner.order = data.get('order', banner.order)
+            db.session.commit()
+            return jsonify({'success': True})
+        return jsonify({'success': False})
+    
+    elif request.method == 'DELETE':
+        banner_id = request.json.get('id')
+        Banner.query.filter_by(id=banner_id).delete()
+        db.session.commit()
+        return jsonify({'success': True})
+
 # ==================== RUN ====================
 if __name__ == '__main__':
     os.makedirs('templates', exist_ok=True)
@@ -225,13 +363,23 @@ if __name__ == '__main__':
     os.makedirs('static/js', exist_ok=True)
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
     
+    # Faqat jadvallarni yaratish, DEFAULT MAHSULOT YO'Q
+    with app.app_context():
+        db.create_all()
+        print("✅ Ma'lumotlar bazasi jadvallari yaratildi")
+        print(f"📦 Mahsulotlar soni: {Product.query.count()} ta")
+    
     port = int(os.environ.get('PORT', 5000))
+    
     print("\n" + "="*50)
     print("  🏪 VISTA MARKET - PostgreSQL bilan")
     print("="*50)
     print(f"  🌐 Do'kon: https://vista-market.onrender.com")
     print(f"  🔐 Admin: https://vista-market.onrender.com/admin")
     print(f"  🔑 Parol: {Config.ADMIN_PASSWORD}")
+    print("="*50)
+    print("\n  ⚠️ DEFAULT MAHSULOTLAR YO'Q!")
+    print("  Admin panel orqali o'zingiz qo'shing")
     print("="*50 + "\n")
     
     app.run(debug=False, host='0.0.0.0', port=port)
